@@ -5,6 +5,7 @@ const getDetailsDiv = document.getElementById("getDetailsDiv");
 const callingInterface = document.getElementById("callingInterface");
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
+const waitingImg = document.getElementById("waitingImg");
 
 let localStream, remoteStream, isCaller, info, rtcPeerConnection;
 
@@ -99,7 +100,9 @@ socket.on("offer", (infor) => {
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
     rtcPeerConnection.ontrack = addTrack;
-    rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(infor.sdp));
+    rtcPeerConnection.setRemoteDescription(
+      new RTCSessionDescription(infor.sdp)
+    );
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
     rtcPeerConnection.createAnswer().then((sessionDescription) => {
@@ -117,27 +120,33 @@ socket.on("answer", (info) => {
   rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(info.sdp));
 });
 
-socket.on('candidate',(event)=>{
+socket.on("candidate", (event) => {
   console.log("Ice Candidate");
-  const candidate=new RTCIceCandidate({
-    sdpMLineIndex:event.label,
-    candidate:event.candidate
-  })
+  const candidate = new RTCIceCandidate({
+    sdpMLineIndex: event.label,
+    candidate: event.candidate,
+  });
   rtcPeerConnection.addIceCandidate(candidate);
-})
+});
+
+socket.on("roomFull", (info) => {
+  swal("Room Full!", "Try other room!", "error");
+});
 
 function addTrack(event) {
   remoteVideo.srcObject = event.streams[0];
   remoteStream = event.streams[0];
+  waitingImg.style.display="none";
+  remoteVideo.style.display="block"
 }
 
-function onIceCandidate(event){
-  if(event.candidate){
-    socket.emit('candidate',{
-      label:event.candidate.sdpMLineIndex,
-      id:event.candidate.sdpMid,
-      candidate:event.candidate.candidate,
-      info:info
-    })
+function onIceCandidate(event) {
+  if (event.candidate) {
+    socket.emit("candidate", {
+      label: event.candidate.sdpMLineIndex,
+      id: event.candidate.sdpMid,
+      candidate: event.candidate.candidate,
+      info: info,
+    });
   }
 }
