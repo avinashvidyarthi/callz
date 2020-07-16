@@ -8,7 +8,7 @@ const remoteVideo = document.getElementById("remoteVideo");
 
 let localStream, remoteStream, isCaller, info, rtcPeerConnection;
 
-const socket = io("http://localhost:3000");
+const socket = io();
 
 const localStreamConstrains = {
   video: {
@@ -41,6 +41,7 @@ joinRoomBtn.onclick = () => {
 };
 
 socket.on("roomCreated", (info) => {
+  console.log("Room Created");
   navigator.mediaDevices
     .getUserMedia(localStreamConstrains)
     .then((stream) => {
@@ -57,6 +58,7 @@ socket.on("roomCreated", (info) => {
 });
 
 socket.on("roomJoined", (info) => {
+  console.log("Room Joined");
   navigator.mediaDevices
     .getUserMedia(localStreamConstrains)
     .then((stream) => {
@@ -74,6 +76,7 @@ socket.on("roomJoined", (info) => {
 });
 
 socket.on("ready", (infor) => {
+  console.log("Ready");
   if (isCaller) {
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
@@ -91,6 +94,7 @@ socket.on("ready", (infor) => {
 });
 
 socket.on("offer", (infor) => {
+  console.log("Offer");
   if (!isCaller) {
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
@@ -109,10 +113,12 @@ socket.on("offer", (infor) => {
 });
 
 socket.on("answer", (info) => {
+  console.log("Answer");
   rtcPeerConnection.setRemoteDescription(new RTCSessionDescription(info.sdp));
 });
 
 socket.on('candidate',(event)=>{
+  console.log("Ice Candidate");
   const candidate=new RTCIceCandidate({
     sdpMLineIndex:event.label,
     candidate:event.candidate
