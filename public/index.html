@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+      integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk"
+      crossorigin="anonymous"
+    />
+    <!-- sweetalert CDN -->
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <!-- socket.io cdn -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+   
+    <!-- custom css -->
+    <link rel="stylesheet" href="./styles.css" />
+    <title>CALLZ</title>
+  </head>
+  <body>
+    <div id="getDetailsDiv">
+      <div class="container-fluid">
+        <div class="row" style="min-height: 100vh;">
+          <div class="col-md-4"></div>
+          <div class="col-md-4 my-auto">
+            <div class="jumbotron p-3">
+              <h2 class="text-center mb-4">Welcome to CALLZ</h2>
+              <div class="form-group">
+                <label>Name</label>
+                <input
+                  type="text"
+                  id="nameField"
+                  class="form-control"
+                  placeholder="Name"
+                />
+              </div>
+              <div class="form-group">
+                <label>Room Name</label>
+                <input
+                  type="text"
+                  id="roomNameField"
+                  class="form-control"
+                  placeholder="Room Name"
+                />
+              </div>
+              <div class="form-group">
+                <button id="joinRoomBtn" class="btn btn-primary btn-block">
+                  Join Room
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-4"></div>
+        </div>
+      </div>
+    </div>
+    <div
+      id="callingInterface"
+      style="min-height: 100vh; display: none;"
+      class="container-fluid py-0 my-0"
+    >
+      <div class="row" style="height: 100vh;">
+        <div class="col-md-4"></div>
+        <div class="col-md-4 my-auto">
+          <div class="container-fluid p-0">
+            <video autoplay style="width: 100%;" id="remoteVideo"></video>
+            <video autoplay muted id="localVideo"></video>
+            <div id="chat" class="my-3">
+              <div id="messageBox" class="jumbotron p-1 mb-1" style="height: 100px; overflow: auto;">
+                gg <br>
+                gg <br>4
+                gg <br>gg <br>gg <br>gg <br>gg <br>
+              </div>
+              <div class="input-group">
+                <input type="text" class="form-control" placeholder="Type your message.." aria-describedby="basic-addon2">
+                <div class="input-group-append">
+                  <button class="btn btn-primary" type="button">Send</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4"></div>
+      </div>
+    </div>
+    <script src="./main.js"></script>
+  </body>
+</html>

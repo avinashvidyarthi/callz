@@ -1,0 +1,30 @@
+#getDetailsDiv {
+  min-height: 100vh;
+}
+
+body {
+  background: #5c258d; /* fallback for old browsers */
+  background: -webkit-linear-gradient(
+    to right,
+    #4389a2,
+    #5c258d
+  ); /* Chrome 10-25, Safari 5.1-6 */
+  background: linear-gradient(to right, #4389a2, #5c258d);
+}
+
+video {
+  transform: rotateY(180deg);
+  -webkit-transform: rotateY(180deg); /* Safari and Chrome */
+  -moz-transform: rotateY(180deg); /* Firefox */
+}
+
+#localVideo {
+  position: absolute;
+  z-index: 1;
+  width: 25%;
+  right: 8%;
+  top: 3%;
+  -webkit-box-shadow: 6px 6px 23px 3px rgba(0, 0, 0, 0.41);
+  -moz-box-shadow: 6px 6px 23px 3px rgba(0, 0, 0, 0.41);
+  box-shadow: 6px 6px 23px 3px rgba(0, 0, 0, 0.41);
+}
