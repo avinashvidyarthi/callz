@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "Btns",
         "CALLZ",
         "crossorigin",
         "infor",
@@ -8,6 +9,7 @@
         "onicecandidate",
         "ontrack",
         "swal",
-        "sweetalert"
+        "sweetalert",
+        "thumbsup"
     ]
 }

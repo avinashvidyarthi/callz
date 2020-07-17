@@ -8,6 +8,13 @@ const remoteVideo = document.getElementById("remoteVideo");
 const msgInput = document.getElementById("msgInput");
 const sendMsgBtn = document.getElementById("sendMsgBtn");
 const messageBox = document.getElementById("messageBox");
+const muteToggleBtn = document.getElementById("muteToggleBtn");
+const callEndBtn = document.getElementById("callEndBtn");
+const heartBtn = document.getElementById("heartBtn");
+const clapBtn = document.getElementById("clapBtn");
+const likeBtn = document.getElementById("likeBtn");
+const helperBtns = document.getElementById("helperBtns");
+const reactionArea = document.getElementById("reactionArea");
 
 let localStream,
   remoteStream,
@@ -112,6 +119,9 @@ socket.on("ready", (infor) => {
     dataChannel.onopen = () => {
       console.log("Data chanel open");
       sendMsgBtn.disabled = false;
+      heartBtn.disabled = false;
+      clapBtn.disabled = false;
+      likeBtn.disabled = false;
       msgInput.focus();
     };
 
@@ -146,6 +156,9 @@ socket.on("offer", (infor) => {
       dataChannel.onopen = () => {
         console.log("Data chanel open");
         sendMsgBtn.disabled = false;
+        heartBtn.disabled = false;
+        clapBtn.disabled = false;
+        likeBtn.disabled = false;
         msgInput.focus();
       };
     };
@@ -201,6 +214,9 @@ function handelData(str) {
   if (dataReceived[0] === "msg") {
     addMessage(dataReceived[1], dataReceived[2]);
   }
+  if(dataReceived[0]==='reaction'){
+    react({origin:"remote",type:dataReceived[1]});
+  }
 }
 
 function addMessage(user, msg) {
@@ -210,4 +226,20 @@ function addMessage(user, msg) {
     messageBox.innerHTML +=
       "<div class='text-danger'>" + user.toUpperCase() + ": " + msg + "</div>";
   }
+}
+
+function react(reactionType){
+  let newDiv=document.createElement("div");
+  newDiv.innerHTML="<img src='./assets/"+reactionType.type+".png' width='50px' height='50px' alt='"+reactionType.type+"' />";
+  newDiv.classList="animate__animated animate__slower animate__fadeOutUp reaction"
+  reactionArea.appendChild(newDiv);
+  setTimeout(()=>{
+    reactionArea.removeChild(newDiv);
+  },2000);
+
+  let origin = reactionType.origin || "local";
+  if(origin==="local"){
+    dataChannel.send("reaction&#&"+reactionType.type);
+  }
+
 }
