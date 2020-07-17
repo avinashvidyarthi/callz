@@ -3,6 +3,8 @@
         "CALLZ",
         "crossorigin",
         "infor",
+        "onconnectionstatechange",
+        "ondatachannel",
         "onicecandidate",
         "ontrack",
         "swal",

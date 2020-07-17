@@ -28,3 +28,12 @@ video {
   -moz-box-shadow: 6px 6px 23px 3px rgba(0, 0, 0, 0.41);
   box-shadow: 6px 6px 23px 3px rgba(0, 0, 0, 0.41);
 }
+
+#remoteUserName{
+  position: absolute;
+  z-index: 2;
+  color: white;
+  top: 2%;
+  left:6%;
+  text-shadow:6px 6px 23px 3px rgba(0, 0, 0, 0.41) ;
+}

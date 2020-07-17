@@ -5,9 +5,17 @@ const getDetailsDiv = document.getElementById("getDetailsDiv");
 const callingInterface = document.getElementById("callingInterface");
 const localVideo = document.getElementById("localVideo");
 const remoteVideo = document.getElementById("remoteVideo");
-const waitingImg = document.getElementById("waitingImg");
+const msgInput = document.getElementById("msgInput");
+const sendMsgBtn = document.getElementById("sendMsgBtn");
+const messageBox = document.getElementById("messageBox");
 
-let localStream, remoteStream, isCaller, info, rtcPeerConnection;
+let localStream,
+  remoteStream,
+  remoteUserName,
+  isCaller,
+  info,
+  rtcPeerConnection,
+  dataChannel;
 
 const socket = io();
 
@@ -32,13 +40,23 @@ joinRoomBtn.onclick = () => {
   if (nameField.value === "" || roomNameField.value === "") {
     return swal("Error", "Name and Room Name must be filled", "error");
   }
-
+  joinRoomBtn.innerHTML = "Joining...";
+  joinRoomBtn.disabled = "true";
   info = {
     roomName: roomNameField.value,
     userName: nameField.value,
   };
 
   socket.emit("createOrJoin", info);
+};
+
+sendMsgBtn.onclick = () => {
+  if (msgInput.value === "") {
+    return;
+  }
+  dataChannel.send("msg&#&" + info.userName + "&#&" + msgInput.value);
+  addMessage("YOU", msgInput.value);
+  msgInput.value = "";
 };
 
 socket.on("roomCreated", (info) => {
@@ -79,11 +97,24 @@ socket.on("roomJoined", (info) => {
 socket.on("ready", (infor) => {
   console.log("Ready");
   if (isCaller) {
+    remoteUserName = infor.userName;
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
     rtcPeerConnection.ontrack = addTrack;
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
+    dataChannel = rtcPeerConnection.createDataChannel(info.roomName);
+
+    dataChannel.onmessage = (event) => {
+      handelData(event.data);
+    };
+
+    dataChannel.onopen = () => {
+      console.log("Data chanel open");
+      sendMsgBtn.disabled = false;
+      msgInput.focus();
+    };
+
     rtcPeerConnection.createOffer().then((sessionDescription) => {
       rtcPeerConnection.setLocalDescription(sessionDescription);
       socket.emit("offer", {
@@ -97,6 +128,7 @@ socket.on("ready", (infor) => {
 socket.on("offer", (infor) => {
   console.log("Offer");
   if (!isCaller) {
+    remoteUserName = infor.info.userName;
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
     rtcPeerConnection.ontrack = addTrack;
@@ -105,6 +137,18 @@ socket.on("offer", (infor) => {
     );
     rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
+    rtcPeerConnection.ondatachannel = (event) => {
+      dataChannel = event.channel;
+      dataChannel.onmessage = (e) => {
+        handelData(e.data);
+      };
+
+      dataChannel.onopen = () => {
+        console.log("Data chanel open");
+        sendMsgBtn.disabled = false;
+        msgInput.focus();
+      };
+    };
     rtcPeerConnection.createAnswer().then((sessionDescription) => {
       rtcPeerConnection.setLocalDescription(sessionDescription);
       socket.emit("answer", {
@@ -136,8 +180,9 @@ socket.on("roomFull", (info) => {
 function addTrack(event) {
   remoteVideo.srcObject = event.streams[0];
   remoteStream = event.streams[0];
-  waitingImg.style.display="none";
-  remoteVideo.style.display="block"
+  document.getElementById('remoteUserName').innerHTML=remoteUserName.toUpperCase();
+  waitingImg.style.display = "none";
+  remoteVideo.style.display = "block";
 }
 
 function onIceCandidate(event) {
@@ -148,5 +193,21 @@ function onIceCandidate(event) {
       candidate: event.candidate.candidate,
       info: info,
     });
+  }
+}
+
+function handelData(str) {
+  const dataReceived = str.split("&#&");
+  if (dataReceived[0] === "msg") {
+    addMessage(dataReceived[1], dataReceived[2]);
+  }
+}
+
+function addMessage(user, msg) {
+  if (user === "YOU") {
+    messageBox.innerHTML += "<div class='text-primary'>YOU: " + msg + "</div>";
+  } else {
+    messageBox.innerHTML +=
+      "<div class='text-danger'>" + user.toUpperCase() + ": " + msg + "</div>";
   }
 }

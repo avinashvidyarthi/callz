@@ -30,7 +30,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on('ready',(info)=>{
-    socket.broadcast.to(info.roomName).emit('ready');
+    socket.broadcast.to(info.roomName).emit('ready',info);
   })
 
   socket.on('candidate',(info)=>{
