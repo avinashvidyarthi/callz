@@ -1,5 +1,5 @@
 self.addEventListener("install", function (event) {
-  console.log("[SW] Install");
+  console.log("[SW] Installing");
   caches.delete("static");
   self.skipWaiting();
   event.waitUntil(

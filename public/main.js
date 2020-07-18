@@ -77,8 +77,12 @@ localVideo.onclick = () => {
   if (localVideoInSmallBox) {
     remoteVideo.srcObject = localStream;
     localVideo.srcObject = remoteStream;
+    remoteVideo.muted=true;
+    localVideo.muted=false;
     localVideoInSmallBox = !localVideoInSmallBox;
   } else {
+    remoteVideo.muted=false;
+    localVideo.muted=true;
     remoteVideo.srcObject = remoteStream;
     localVideo.srcObject = localStream;
     localVideoInSmallBox = !localVideoInSmallBox;
