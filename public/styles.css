@@ -3,13 +3,7 @@
 }
 
 body {
-  background: #5c258d; /* fallback for old browsers */
-  background: -webkit-linear-gradient(
-    to right,
-    #4389a2,
-    #5c258d
-  ); /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #4389a2, #5c258d);
+  background-color: #F4C2C2;
 }
 
 video {

@@ -22,7 +22,10 @@ let localStream,
   isCaller,
   info,
   rtcPeerConnection,
-  dataChannel;
+  dataChannel,
+  localVideoInSmallBox = true,
+  audioSender,
+  isMute = false;
 
 const socket = io();
 
@@ -66,6 +69,34 @@ sendMsgBtn.onclick = () => {
   msgInput.value = "";
 };
 
+localVideo.onclick = () => {
+  if (localVideoInSmallBox) {
+    remoteVideo.srcObject = localStream;
+    localVideo.srcObject = remoteStream;
+    localVideoInSmallBox = !localVideoInSmallBox;
+  } else {
+    remoteVideo.srcObject = remoteStream;
+    localVideo.srcObject = localStream;
+    localVideoInSmallBox = !localVideoInSmallBox;
+  }
+};
+
+muteToggleBtn.onclick = () => {
+  if (!isMute) {
+    dataChannel.send("mute");
+    muteToggleBtn.classList = "btn btn-danger";
+  } else {
+    dataChannel.send("unmute");
+    muteToggleBtn.classList = "btn btn-secondary";
+  }
+  isMute = !isMute;
+};
+
+callEndBtn.onclick=()=>{
+  rtcPeerConnection.close();
+  window.location.reload();
+}
+
 socket.on("roomCreated", (info) => {
   console.log("Room Created");
   navigator.mediaDevices
@@ -108,7 +139,11 @@ socket.on("ready", (infor) => {
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
     rtcPeerConnection.ontrack = addTrack;
-    rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
+    rtcPeerConnection.onconnectionstatechange = stateListener;
+    audioSender = rtcPeerConnection.addTrack(
+      localStream.getTracks()[0],
+      localStream
+    );
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
     dataChannel = rtcPeerConnection.createDataChannel(info.roomName);
 
@@ -122,7 +157,6 @@ socket.on("ready", (infor) => {
       heartBtn.disabled = false;
       clapBtn.disabled = false;
       likeBtn.disabled = false;
-      msgInput.focus();
     };
 
     rtcPeerConnection.createOffer().then((sessionDescription) => {
@@ -142,10 +176,14 @@ socket.on("offer", (infor) => {
     rtcPeerConnection = new RTCPeerConnection(iceServers);
     rtcPeerConnection.onicecandidate = onIceCandidate;
     rtcPeerConnection.ontrack = addTrack;
+    rtcPeerConnection.onconnectionstatechange = stateListener;
     rtcPeerConnection.setRemoteDescription(
       new RTCSessionDescription(infor.sdp)
     );
-    rtcPeerConnection.addTrack(localStream.getTracks()[0], localStream);
+    audioSender = rtcPeerConnection.addTrack(
+      localStream.getTracks()[0],
+      localStream
+    );
     rtcPeerConnection.addTrack(localStream.getTracks()[1], localStream);
     rtcPeerConnection.ondatachannel = (event) => {
       dataChannel = event.channel;
@@ -159,7 +197,6 @@ socket.on("offer", (infor) => {
         heartBtn.disabled = false;
         clapBtn.disabled = false;
         likeBtn.disabled = false;
-        msgInput.focus();
       };
     };
     rtcPeerConnection.createAnswer().then((sessionDescription) => {
@@ -193,7 +230,9 @@ socket.on("roomFull", (info) => {
 function addTrack(event) {
   remoteVideo.srcObject = event.streams[0];
   remoteStream = event.streams[0];
-  document.getElementById('remoteUserName').innerHTML=remoteUserName.toUpperCase();
+  document.getElementById(
+    "remoteUserName"
+  ).innerHTML = remoteUserName.toUpperCase();
   waitingImg.style.display = "none";
   remoteVideo.style.display = "block";
 }
@@ -214,8 +253,14 @@ function handelData(str) {
   if (dataReceived[0] === "msg") {
     addMessage(dataReceived[1], dataReceived[2]);
   }
-  if(dataReceived[0]==='reaction'){
-    react({origin:"remote",type:dataReceived[1]});
+  if (dataReceived[0] === "reaction") {
+    react({ origin: "remote", type: dataReceived[1] });
+  }
+  if (str === "mute") {
+    remoteVideo.muted = true;
+  }
+  if (str === "unmute") {
+    remoteVideo.muted = false;
   }
 }
 
@@ -226,20 +271,50 @@ function addMessage(user, msg) {
     messageBox.innerHTML +=
       "<div class='text-danger'>" + user.toUpperCase() + ": " + msg + "</div>";
   }
+  messageBox.scrollTop = messageBox.scrollHeight;
 }
 
-function react(reactionType){
-  let newDiv=document.createElement("div");
-  newDiv.innerHTML="<img src='./assets/"+reactionType.type+".png' width='50px' height='50px' alt='"+reactionType.type+"' />";
-  newDiv.classList="animate__animated animate__slower animate__fadeOutUp reaction"
+function react(reactionType) {
+  let newDiv = document.createElement("div");
+  newDiv.innerHTML =
+    "<img src='./assets/" +
+    reactionType.type +
+    ".png' width='50px' height='50px' alt='" +
+    reactionType.type +
+    "' />";
+  newDiv.classList =
+    "animate__animated animate__slower animate__fadeOutUp reaction";
   reactionArea.appendChild(newDiv);
-  setTimeout(()=>{
+  setTimeout(() => {
     reactionArea.removeChild(newDiv);
-  },2000);
+  }, 3000);
 
   let origin = reactionType.origin || "local";
-  if(origin==="local"){
-    dataChannel.send("reaction&#&"+reactionType.type);
+  if (origin === "local") {
+    dataChannel.send("reaction&#&" + reactionType.type);
   }
+}
 
+function stateListener(event) {
+  switch (rtcPeerConnection.connectionState) {
+    case "connected": {
+      console.log("Connected");
+      break;
+    }
+    case "disconnected": {
+      swal("Disconnected!","Other user disconnected.","error");
+      setTimeout(()=>{
+        window.location.reload();
+      },2000);
+      break;
+    }
+    case "failed": {
+      console.log("failed");
+      break;
+    }
+    case "closed": {
+      window.location.reload();
+      break;
+    }
+  }
 }
