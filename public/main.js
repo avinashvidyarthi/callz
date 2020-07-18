@@ -57,7 +57,7 @@ joinRoomBtn.onclick = () => {
   joinRoomBtn.innerHTML = "Joining...";
   joinRoomBtn.disabled = "true";
   info = {
-    roomName: roomNameField.value,
+    roomName: roomNameField.value.toLowerCase(),
     userName: nameField.value,
   };
   aboutArea.style.display="none";
