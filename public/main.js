@@ -318,3 +318,13 @@ function stateListener(event) {
     }
   }
 }
+
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register("/sw.js").then((e)=>{
+    console.log("[SW] Registered");
+  })
+}
+
+window.addEventListener('beforeinstallprompt',function(event){
+  console.log("[SW] Before Install");
+})
