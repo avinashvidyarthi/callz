@@ -15,6 +15,7 @@ const clapBtn = document.getElementById("clapBtn");
 const likeBtn = document.getElementById("likeBtn");
 const helperBtns = document.getElementById("helperBtns");
 const reactionArea = document.getElementById("reactionArea");
+const aboutArea = document.getElementById("about");
 
 let localStream,
   remoteStream,
@@ -50,13 +51,16 @@ joinRoomBtn.onclick = () => {
   if (nameField.value === "" || roomNameField.value === "") {
     return swal("Error", "Name and Room Name must be filled", "error");
   }
+  if(!window.navigator.onLine){
+    return swal("Offline!","You are not connected to Internet.","error");
+  }
   joinRoomBtn.innerHTML = "Joining...";
   joinRoomBtn.disabled = "true";
   info = {
     roomName: roomNameField.value,
     userName: nameField.value,
   };
-
+  aboutArea.style.display="none";
   socket.emit("createOrJoin", info);
 };
 
