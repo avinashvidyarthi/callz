@@ -17,6 +17,21 @@ const helperBtns = document.getElementById("helperBtns");
 const reactionArea = document.getElementById("reactionArea");
 const aboutArea = document.getElementById("about");
 
+var qs = (function (a) {
+  if (a == "") return {};
+  var b = {};
+  for (var i = 0; i < a.length; ++i) {
+    var p = a[i].split("=", 2);
+    if (p.length == 1) b[p[0]] = "";
+    else b[p[0]] = decodeURIComponent(p[1].replace(/\+/g, " "));
+  }
+  return b;
+})(window.location.search.substr(1).split("&"));
+
+if (qs["room"]) {
+  roomNameField.value = qs["room"];
+}
+
 let localStream,
   remoteStream,
   remoteUserName,
@@ -51,8 +66,8 @@ joinRoomBtn.onclick = () => {
   if (nameField.value === "" || roomNameField.value === "") {
     return swal("Error", "Name and Room Name must be filled", "error");
   }
-  if(!window.navigator.onLine){
-    return swal("Offline!","You are not connected to Internet.","error");
+  if (!window.navigator.onLine) {
+    return swal("Offline!", "You are not connected to Internet.", "error");
   }
   joinRoomBtn.innerHTML = "Joining...";
   joinRoomBtn.disabled = "true";
@@ -60,7 +75,7 @@ joinRoomBtn.onclick = () => {
     roomName: roomNameField.value.toLowerCase(),
     userName: nameField.value,
   };
-  aboutArea.style.display="none";
+  aboutArea.style.display = "none";
   socket.emit("createOrJoin", info);
 };
 
@@ -77,12 +92,12 @@ localVideo.onclick = () => {
   if (localVideoInSmallBox) {
     remoteVideo.srcObject = localStream;
     localVideo.srcObject = remoteStream;
-    remoteVideo.muted=true;
-    localVideo.muted=false;
+    remoteVideo.muted = true;
+    localVideo.muted = false;
     localVideoInSmallBox = !localVideoInSmallBox;
   } else {
-    remoteVideo.muted=false;
-    localVideo.muted=true;
+    remoteVideo.muted = false;
+    localVideo.muted = true;
     remoteVideo.srcObject = remoteStream;
     localVideo.srcObject = localStream;
     localVideoInSmallBox = !localVideoInSmallBox;
@@ -100,13 +115,32 @@ muteToggleBtn.onclick = () => {
   isMute = !isMute;
 };
 
-callEndBtn.onclick=()=>{
+callEndBtn.onclick = () => {
   rtcPeerConnection.close();
   window.location.reload();
-}
+};
 
 socket.on("roomCreated", (info) => {
   console.log("Room Created");
+  swal({
+    text:
+      "Share this link: " + window.location.origin + "?room=" + info.roomName,
+    buttons: {
+      cancel: true,
+      confirm: {
+        text: "Copy",
+        value: "copy",
+      },
+    },
+  }).then((data) => {
+    if (data === "copy") {
+      navigator.clipboard
+        .writeText(window.location.origin + "?room=" + info.roomName)
+        .then(() => {
+          swal("Copied!", "", "success");
+        });
+    }
+  });
   navigator.mediaDevices
     .getUserMedia(localStreamConstrains)
     .then((stream) => {
@@ -310,10 +344,10 @@ function stateListener(event) {
       break;
     }
     case "disconnected": {
-      swal("Disconnected!","Other user disconnected.","error");
-      setTimeout(()=>{
+      swal("Disconnected!", "Other user disconnected.", "error");
+      setTimeout(() => {
         window.location.reload();
-      },2000);
+      }, 2000);
       break;
     }
     case "failed": {
@@ -327,12 +361,12 @@ function stateListener(event) {
   }
 }
 
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register("/sw.js").then((e)=>{
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("/sw.js").then((e) => {
     console.log("[SW] Registered");
-  })
+  });
 }
 
-window.addEventListener('beforeinstallprompt',function(event){
+window.addEventListener("beforeinstallprompt", function (event) {
   console.log("[SW] Before Install");
-})
+});

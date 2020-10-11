@@ -10,9 +10,6 @@ self.addEventListener("install", function (event) {
         "https://unpkg.com/sweetalert/dist/sweetalert.min.js",
         "https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js",
         "/styles.css",
-        "/main.js",
-        "/index.html",
-        "/",
         "/manifest.json",
         "/assets/glyphy.png",
         "/assets/clap.png",
@@ -37,10 +34,6 @@ self.addEventListener("fetch", function (event) {
     })
   );
 });
-
-
-
-
 
 self.addEventListener("activate", function (event) {
   console.log("[SW] Activated");
