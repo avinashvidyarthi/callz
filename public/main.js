@@ -88,29 +88,31 @@ sendMsgBtn.onclick = () => {
   msgInput.value = "";
 };
 
-localVideo.onclick = () => {
-  if (localVideoInSmallBox) {
-    remoteVideo.srcObject = localStream;
-    localVideo.srcObject = remoteStream;
-    remoteVideo.muted = true;
-    localVideo.muted = false;
-    localVideoInSmallBox = !localVideoInSmallBox;
-  } else {
-    remoteVideo.muted = false;
-    localVideo.muted = true;
-    remoteVideo.srcObject = remoteStream;
-    localVideo.srcObject = localStream;
-    localVideoInSmallBox = !localVideoInSmallBox;
-  }
-};
+// localVideo.onclick = () => {
+//   if (localVideoInSmallBox) {
+//     remoteVideo.srcObject = localStream;
+//     localVideo.srcObject = remoteStream;
+//     remoteVideo.muted = true;
+//     localVideo.muted = false;
+//     localVideoInSmallBox = !localVideoInSmallBox;
+//   } else {
+//     remoteVideo.muted = false;
+//     localVideo.muted = true;
+//     remoteVideo.srcObject = remoteStream;
+//     localVideo.srcObject = localStream;
+//     localVideoInSmallBox = !localVideoInSmallBox;
+//   }
+// };
 
 muteToggleBtn.onclick = () => {
   if (!isMute) {
     dataChannel.send("mute");
     muteToggleBtn.classList = "btn btn-danger";
+    addMessage("YOU", "MUTED!");
   } else {
     dataChannel.send("unmute");
     muteToggleBtn.classList = "btn btn-secondary";
+    addMessage("YOU", "UNMUTED!");
   }
   isMute = !isMute;
 };
@@ -300,9 +302,11 @@ function handelData(str) {
   }
   if (str === "mute") {
     remoteVideo.muted = true;
+    addMessage(remoteUserName, "MUTED!");
   }
   if (str === "unmute") {
     remoteVideo.muted = false;
+    addMessage(remoteUserName, "UNMUTED!");
   }
 }
 
